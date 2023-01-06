@@ -36,6 +36,19 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
+  cloud_firestore: ^4.3.1
+  image_picker: ^0.8.6
+  firebase_storage: ^11.0.10
+  firebase_auth: ^4.2.5
+  google_sign_in: ^5.4.2
+  geolocator: ^9.0.2
+  uuid: ^3.0.7
+  image: ^4.0.7
+  animator: ^3.2.0
+  path_provider: ^2.0.11
+  firebase_messaging: ^14.2.1
+  timeago: ^3.3.0
+  cached_network_image: ^3.2.3
 
 dev_dependencies:
   flutter_test:
@@ -78,7 +91,7 @@ flutter:
   fonts:
     - family: Moon Dance
       fonts:
-        - asset: assets/MoonDance-Regular.ttf
+        - asset: assets/fonts/MoonDance-Regular.ttf
   #   - family: Trajan Pro
   #     fonts:
   #       - asset: fonts/TrajanPro.ttf
