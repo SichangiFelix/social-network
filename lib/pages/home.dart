@@ -1,5 +1,8 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:social_network/pages/profile.dart';
+import 'package:social_network/pages/timeline.dart';
 
 final GoogleSignIn googleSignIn = GoogleSignIn();
 
@@ -13,6 +16,10 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   bool isAuth = false;
 
+  int pageIndex = 0;
+
+ late  PageController pageController;
+
   login() {
     googleSignIn.signIn();
   }
@@ -21,12 +28,42 @@ class _HomeState extends State<Home> {
     googleSignIn.signOut();
   }
 
+onPageChanged(int pageIndex){
+  setState(() {
+    this.pageIndex = pageIndex;
+  });
+}
+
+onTap(int pageIndex){
+  pageController.animateToPage(pageIndex, duration: Duration(milliseconds: 200), curve: Curves.easeIn);
+}
   Widget buildAuthScreen() {
-    return ElevatedButton(
-        onPressed: () {
-          logout();
-        },
-        child: Text('Logout'));
+    return Scaffold(
+      body: PageView(
+        children: <Widget>[
+          Timeline(),
+          // ActivityFeed(),
+          // Upload(),
+          // Search(),
+          Profile(),
+        ],
+        controller: pageController,
+        onPageChanged: onPageChanged,
+        physics: const NeverScrollableScrollPhysics(),
+      ),
+      bottomNavigationBar: CupertinoTabBar(
+        currentIndex: pageIndex,
+        onTap: onTap,
+        activeColor: Theme.of(context).primaryColor,
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.whatshot),),
+          BottomNavigationBarItem(icon: Icon(Icons.notifications_active),),
+          BottomNavigationBarItem(icon: Icon(Icons.photo_camera, size: 35.0,),),
+          BottomNavigationBarItem(icon: Icon(Icons.search),),
+          BottomNavigationBarItem(icon: Icon(Icons.account_circle),),
+        ],
+      ),
+    );
   }
 
   Widget buildUnAuthScreen() {
@@ -76,6 +113,8 @@ class _HomeState extends State<Home> {
   @override
   void initState() {
     super.initState();
+
+    pageController = PageController();
     //detects if user is signed in
     googleSignIn.onCurrentUserChanged.listen((account) {
       handleSignIn(account);
@@ -88,6 +127,12 @@ class _HomeState extends State<Home> {
     }).catchError((err) {
       print(err);
     });
+  }
+
+  @override 
+  void dispose(){
+    super.dispose();
+    pageController.dispose();
   }
 
   handleSignIn(GoogleSignInAccount? account) {
