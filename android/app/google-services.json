@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "830584660369-tjg2qiehid6b7oa2kgqv11cb9ottqcjj.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.sichangi.social_network",
+            "certificate_hash": "aab13fd7936615abfedede39cd8323f015005ab2"
+          }
+        },
+        {
           "client_id": "830584660369-t927selpa08qgl3u5ir9c8cb7dnnj089.apps.googleusercontent.com",
           "client_type": 3
         }
