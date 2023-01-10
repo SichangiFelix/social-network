@@ -3,8 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:social_network/pages/profile.dart';
 import 'package:social_network/pages/timeline.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+import '../models/user.dart';
+import 'create_account.dart';
 
 final GoogleSignIn googleSignIn = GoogleSignIn();
+final usersRef = FirebaseFirestore.instance.collection('users');
+final DateTime timestamp = DateTime.now();
+late User currentUser;
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -42,6 +49,9 @@ onTap(int pageIndex){
       body: PageView(
         children: <Widget>[
           Timeline(),
+          ElevatedButton(onPressed: (){
+            googleSignIn.signOut();
+          }, child: Text('Logout')),
           // ActivityFeed(),
           // Upload(),
           // Search(),
@@ -136,7 +146,7 @@ onTap(int pageIndex){
 
   handleSignIn(GoogleSignInAccount? account) {
     if (account != null) {
-      print('User signed in! $account');
+      createUserInFirestore();
       setState(() {
         isAuth = true;
       });
@@ -145,6 +155,33 @@ onTap(int pageIndex){
         isAuth = false;
       });
     }
+  }
+
+  createUserInFirestore() async {
+    //check if user exsists in users collection in db according to id
+    final GoogleSignInAccount? user = googleSignIn.currentUser;
+    DocumentSnapshot doc = await usersRef.doc(user!.id).get();
+
+    if(!doc.exists){
+      //If user does not exsist , we take them to create acc page
+      print('Testing... to navigate to create account screeen');
+      final username =  Navigator.push(context, MaterialPageRoute(builder: (context) => const CreateAccount()));
+      //get username from create acc page and add as new doc in collection
+
+      usersRef.doc(user.id).set({
+        "id": user.id,
+        "username": username,
+        "photoUrl": user.photoUrl,
+        "email": user.email,
+        "displayName": user.displayName,
+        "bio": "",
+        "timestamp": timestamp,
+      });
+      doc = await usersRef.doc(user!.id).get();
+    }
+    currentUser = User.fromDocument(doc);
+    print(currentUser);
+    print(currentUser.username);
   }
 
   @override
