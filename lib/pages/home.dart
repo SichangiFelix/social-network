@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:social_network/pages/profile.dart';
+import 'package:social_network/pages/search.dart';
 import 'package:social_network/pages/timeline.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -47,6 +48,9 @@ onTap(int pageIndex){
   Widget buildAuthScreen() {
     return Scaffold(
       body: PageView(
+        controller: pageController,
+        onPageChanged: onPageChanged,
+        physics: const NeverScrollableScrollPhysics(),
         children: <Widget>[
           Timeline(),
           ElevatedButton(onPressed: (){
@@ -54,12 +58,9 @@ onTap(int pageIndex){
           }, child: Text('Logout')),
           // ActivityFeed(),
           // Upload(),
-          // Search(),
+          Search(),
           Profile(),
         ],
-        controller: pageController,
-        onPageChanged: onPageChanged,
-        physics: const NeverScrollableScrollPhysics(),
       ),
       bottomNavigationBar: CupertinoTabBar(
         currentIndex: pageIndex,

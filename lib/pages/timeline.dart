@@ -18,7 +18,7 @@ class _TimelineState extends State<Timeline> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: header(context, isAppTitle: true),
+      appBar: header(context, isAppTitle: true, implyLeading: true),
       body: null,
     );
   }

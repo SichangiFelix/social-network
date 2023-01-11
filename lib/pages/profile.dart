@@ -15,7 +15,7 @@ class _ProfileState extends State<Profile> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: header(context, titleText: 'Profile'),
+      appBar: header(context, titleText: 'Profile', implyLeading: true),
       body: circularProgress(),
     );
   }
