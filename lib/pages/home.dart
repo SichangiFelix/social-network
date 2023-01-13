@@ -5,6 +5,7 @@ import 'package:social_network/pages/profile.dart';
 import 'package:social_network/pages/search.dart';
 import 'package:social_network/pages/timeline.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:social_network/pages/upload.dart';
 
 import '../models/user.dart';
 import 'create_account.dart';
@@ -12,9 +13,9 @@ import 'create_account.dart';
 final GoogleSignIn googleSignIn = GoogleSignIn();
 final usersRef = FirebaseFirestore.instance.collection('users');
 final DateTime timestamp = DateTime.now();
-late User currentUser;
 
 class Home extends StatefulWidget {
+
   const Home({super.key});
 
   @override
@@ -22,6 +23,7 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  late User currentUser;
   bool isAuth = false;
 
   int pageIndex = 0;
@@ -57,7 +59,7 @@ onTap(int pageIndex){
             googleSignIn.signOut();
           }, child: Text('Logout')),
           // ActivityFeed(),
-          // Upload(),
+          Upload(),
           Search(),
           Profile(),
         ],
@@ -181,8 +183,6 @@ onTap(int pageIndex){
       doc = await usersRef.doc(user!.id).get();
     }
     currentUser = User.fromDocument(doc);
-    print(currentUser);
-    print(currentUser.username);
   }
 
   @override
