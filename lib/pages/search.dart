@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:social_network/pages/home.dart';
 import 'package:social_network/widgets/progress.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -116,9 +115,9 @@ class UserResult extends StatelessWidget {
                 backgroundColor: Colors.white12,
                 backgroundImage: CachedNetworkImageProvider(user.photoUrl),
               ),
-              title: Text(user.displayName, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),),
-              subtitle: Text(user.username, style: const TextStyle(
-                color: Colors.white,
+              title: Text(user.displayName, style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold),),
+              subtitle: Text(user.username == null? 'Null': user.username!, style: const TextStyle(
+                color: Colors.black,
               ),),
             ),
           ),
