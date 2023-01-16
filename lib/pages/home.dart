@@ -6,13 +6,18 @@ import 'package:social_network/pages/search.dart';
 import 'package:social_network/pages/timeline.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:social_network/pages/upload.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 import '../models/user.dart';
 import 'create_account.dart';
 
 final GoogleSignIn googleSignIn = GoogleSignIn();
 final usersRef = FirebaseFirestore.instance.collection('users');
+final postsRef = FirebaseFirestore.instance.collection('posts');
+final Reference storageReference = FirebaseStorage.instance.ref();
 final DateTime timestamp = DateTime.now();
+User? currentUser;
+
 
 class Home extends StatefulWidget {
 
@@ -23,7 +28,6 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  late User currentUser;
   bool isAuth = false;
 
   int pageIndex = 0;
@@ -45,7 +49,7 @@ onPageChanged(int pageIndex){
 }
 
 onTap(int pageIndex){
-  pageController.animateToPage(pageIndex, duration: Duration(milliseconds: 200), curve: Curves.easeIn);
+  pageController.animateToPage(pageIndex, duration: const Duration(milliseconds: 200), curve: Curves.easeIn);
 }
   Widget buildAuthScreen() {
     return Scaffold(
@@ -59,9 +63,9 @@ onTap(int pageIndex){
             googleSignIn.signOut();
           }, child: Text('Logout')),
           // ActivityFeed(),
-          Upload(),
+          Upload(currentUser: currentUser,),
           Search(),
-          Profile(),
+          Profile(profileId: currentUser?.id),
         ],
       ),
       bottomNavigationBar: CupertinoTabBar(
@@ -125,7 +129,6 @@ onTap(int pageIndex){
   @override
   void initState() {
     super.initState();
-
     pageController = PageController();
     //detects if user is signed in
     googleSignIn.onCurrentUserChanged.listen((account) {
@@ -168,7 +171,7 @@ onTap(int pageIndex){
     if(!doc.exists){
       //If user does not exsist , we take them to create acc page
       print('Testing... to navigate to create account screeen');
-      final username =  Navigator.push(context, MaterialPageRoute(builder: (context) => const CreateAccount()));
+      final username =  await  Navigator.push(context, MaterialPageRoute(builder: (context) => const CreateAccount()));
       //get username from create acc page and add as new doc in collection
 
       usersRef.doc(user.id).set({
