@@ -1,7 +1,13 @@
 import 'dart:io';
-import 'dart:typed_data';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:social_network/pages/home.dart';
+import 'package:social_network/widgets/progress.dart';
+import 'package:image/image.dart' as Im;
+import 'package:uuid/uuid.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 import '../models/user.dart';
 
@@ -15,7 +21,11 @@ class Upload extends StatefulWidget {
 }
 
 class _UploadState extends State<Upload> {
+  TextEditingController locationController = TextEditingController();
+  TextEditingController captionController = TextEditingController();
   File? file;
+  bool fileIsUploading = false;
+  String postId = Uuid().v4();
 
   handleTakePhoto() async {
     Navigator.pop(context);
@@ -48,7 +58,7 @@ class _UploadState extends State<Upload> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Image.asset(""),
+          //Image.asset(""),
           Padding(
             padding: const EdgeInsets.only(top: 20),
             child: ElevatedButton(
@@ -63,15 +73,15 @@ class _UploadState extends State<Upload> {
                             child: const Text(
                               'Photo with Camera',
                             ),
-                            onPressed: ()=> handleTakePhoto(),
+                            onPressed: () => handleTakePhoto(),
                           ),
                           SimpleDialogOption(
                             child: const Text('Photo from Gallery'),
-                            onPressed: ()=> handleChooseFromGallery(),
+                            onPressed: () => handleChooseFromGallery(),
                           ),
                           SimpleDialogOption(
                             child: const Text('Cancel'),
-                            onPressed: ()=> Navigator.pop(context),
+                            onPressed: () => Navigator.pop(context),
                           ),
                         ],
                       );
@@ -100,6 +110,57 @@ class _UploadState extends State<Upload> {
     });
   }
 
+  compressImage() async {
+    final tempDir = await getTemporaryDirectory();
+    final path = tempDir.path;
+    Im.Image? imageFile = Im.decodeImage(file!.readAsBytesSync());
+    if (imageFile != null) {
+     final compressedImageFile = File("$path/img_$postId.jpg")
+        ..writeAsBytesSync(Im.encodeJpg(imageFile, quality: 85));
+     setState(() {
+       file = compressedImageFile;
+     });
+    }
+  }
+  Future<String> uploadImage(imageFile)async{
+    UploadTask uploadTask = storageReference.child("post_$postId.jpg").putFile(imageFile);
+    //TaskSnapshot storageSnap =  uploadTask.snapshot;
+    String downloadUrl = await (await uploadTask).ref.getDownloadURL();
+    return downloadUrl;
+  }
+  createPostInFirestore({required String mediaUrl, String? location, String? description}){
+    if(widget.currentUser != null){
+      postsRef.doc(widget.currentUser!.id).collection("userPosts").doc(postId).set({
+        "postId": postId,
+        "ownerId": widget.currentUser!.id,
+        "username": widget.currentUser!.username,
+        "mediaUrl": mediaUrl,
+        "description": description,
+        "location": location,
+        "likes": {},
+      });
+    }
+    captionController.clear();
+    locationController.clear();
+    setState(() {
+      file = null;
+      fileIsUploading = false;
+      postId = Uuid().v4();
+    });
+  }
+
+  handleSubmit() async{
+    setState(() {
+      fileIsUploading = true;
+    });
+    //Compress image
+    await compressImage();
+    String mediaUrl = await uploadImage(file);
+    createPostInFirestore(mediaUrl: mediaUrl, location: locationController.text, description: captionController.text);
+    if(!mounted) return;
+    Navigator.pop(context);
+  }
+
   buildUploadForm() {
     return Scaffold(
       appBar: AppBar(
@@ -117,7 +178,7 @@ class _UploadState extends State<Upload> {
         ),
         actions: [
           TextButton(
-              onPressed: () {},
+              onPressed: fileIsUploading ? null : () => handleSubmit(),
               child: const Text(
                 'Post',
                 style: TextStyle(
@@ -129,22 +190,82 @@ class _UploadState extends State<Upload> {
       ),
       body: ListView(
         children: [
-          // Container(
-          //   height: 220,
-          //   width: MediaQuery.of(context).size.width * 0.8,
-          //   child: Center(
-          //     child: AspectRatio(
-          //       aspectRatio: 16/9,
-          //       child: Container(
-          //         decoration: BoxDecoration(
-          //           image: DecorationImage(
-          //               image: MemoryImage(),
-          //           ),
-          //         ),
-          //       ),
-          //     ),
-          //   ),
-          // ),
+          fileIsUploading ? linearProgress() : const Text(''),
+          Container(
+            height: 220,
+            width: MediaQuery.of(context).size.width * 0.8,
+            child: Center(
+              child: AspectRatio(
+                aspectRatio: 16 / 9,
+                child: Container(
+                  decoration: BoxDecoration(
+                    image: DecorationImage(
+                      image: FileImage(file!),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Padding(padding: EdgeInsets.only(top: 10)),
+          ListTile(
+            leading: CircleAvatar(
+              backgroundImage:
+                  CachedNetworkImageProvider(widget.currentUser!.photoUrl),
+            ),
+            title: Container(
+              width: 250,
+              child: TextField(
+                controller: captionController,
+                decoration: InputDecoration(
+                  hintText: "Write a caption...",
+                  border: InputBorder.none,
+                ),
+              ),
+            ),
+          ),
+          Divider(),
+          ListTile(
+            leading: Icon(
+              Icons.pin_drop,
+              color: Colors.orange,
+              size: 35.0,
+            ),
+            title: Container(
+              width: 250.0,
+              child: TextField(
+                controller: locationController,
+                decoration: InputDecoration(
+                  hintText: "Where was this photo taken?",
+                  border: InputBorder.none,
+                ),
+              ),
+            ),
+          ),
+          Container(
+            width: 200,
+            height: 100,
+            alignment: Alignment.center,
+            child: ElevatedButton.icon(
+                onPressed: () {
+                  //Get user location
+                },
+                style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                    )),
+                icon: Icon(
+                  Icons.my_location,
+                  color: Colors.white,
+                ),
+                label: Text(
+                  "Use Current Location",
+                  style: TextStyle(
+                    color: Colors.white,
+                  ),
+                )),
+          ),
         ],
       ),
     );
