@@ -1,16 +1,29 @@
 # social_network
 
-A new Flutter project.
+### Project Idea  
+This is a mobile application built for online human interactions. People can get onboard and share posts,
+comment on posts, like posts, have a feed, follow and unfollow users of their choice, and upload images.
 
-## Getting Started
+### Technologies used
+-  Flutter Framework
+    * Dart
+-  Firebase for the backend
 
-This project is a starting point for a Flutter application.
+### Features
+-  Authentication
+-  Posts
+-  Chats
+-  File upload
+-  Comments
+-  User profile
+-  Follow and unfollow users
+-  Feed
 
-A few resources to get you started if this is your first Flutter project:
+### Local setup
+-  Fork the repo.
+-  Clone it to your local setup by using the command <code>git clone (repository link)</code>
+-  Open the project with Android Studio or VS code
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Directly cloning from Android Studio (Alternate method):
+-  Go to FILE -> NEW -> PROJECT FROM VERSION CONTROL
+-  Copy and paste the url of FORKED repo in the URL field and click clone.
